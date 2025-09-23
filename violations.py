@@ -25,22 +25,25 @@ def violations(title):
     odm_journeys = pd.read_csv(os.path.join("out", title, "odm_journeys.csv"))
     cost_threshold = pd.read_csv(os.path.join("out", title, "cost_threshold.csv"))
 
-    blacklist_violations = []
-    whitelist_violations = []
+    blacklist_violations = {"time": [], "cost": []}
+    whitelist_violations = {"time": [], "cost": []}
     for j in odm_journeys.itertuples():
         below_threshold = (
             j.cost < cost_threshold[cost_threshold["time"] == j.center].iat[0, 1]
         )
 
-        print("below_threshold: {}, journeys: {}".format(below_threshold, j))
-
         if below_threshold and contains(blacklist, j):
-            blacklist_violations.append()
-            continue
+            blacklist_violations["time"].append(j.center)
+            blacklist_violations["cost"].append(j.cost)
         if (not below_threshold) and contains(whitelist, j):
-            violation.append("whitelist")
-            continue
-        violation.append("none")
+            whitelist_violations["time"].append(j.center)
+            whitelist_violations["cost"].append(j.cost)
 
-    odm_journeys["violation"] = violation
-    odm_journeys.to_csv(os.path.join("out", title, "odm_journeys.csv"))
+    pd.DataFrame(blacklist_violations).to_csv(
+        os.path.join("out", title, "blacklist_violations.csv"), index=False
+    )
+    pd.DataFrame(whitelist_violations).to_csv(
+        os.path.join("out", title, "whitelist_violations.csv"), index=False
+    )
+
+    return blacklist_violations["time"] or whitelist_violations["time"]
