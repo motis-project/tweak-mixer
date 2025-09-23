@@ -56,19 +56,6 @@ def visualize(title):
         whitelist_violations["time"], utc=True
     ).dt.tz_convert("Europe/Berlin")
 
-    journeys["first_mile_duration"] = journeys["first_mile_duration"].apply(
-        lambda x: pd.Timedelta(x, unit="m")
-    )
-    journeys["last_mile_duration"] = journeys["last_mile_duration"].apply(
-        lambda x: pd.Timedelta(x, unit="m")
-    )
-    odm_journeys["travel_time"] = odm_journeys["travel_time"].apply(
-        lambda x: pd.Timedelta(x, unit="m")
-    )
-    odm_journeys["odm_time"] = odm_journeys["odm_time"].apply(
-        lambda x: pd.Timedelta(x, unit="m")
-    )
-
     fig = go.Figure()
 
     # threshold
@@ -189,12 +176,12 @@ def visualize(title):
         ].reset_index()
 
         first_mile_end = j.departure + (
-            journeys_row.at[0, "first_mile_duration"]
+            pd.Timedelta(journeys_row.at[0, "first_mile_duration"], unit="m")
             if journeys_row.at[0, "first_mile_mode"] == "taxi"
             else pd.Timedelta(0, unit="m")
         )
         last_mile_begin = j.arrival - (
-            journeys_row.at[0, "last_mile_duration"]
+            pd.Timedelta(journeys_row.at[0, "last_mile_duration"], unit="m")
             if journeys_row.at[0, "last_mile_mode"] == "taxi"
             else pd.Timedelta(0, unit="m")
         )
