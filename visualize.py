@@ -3,9 +3,12 @@ import pandas as pd
 import plotly.graph_objects as go
 import numpy as np
 
+import warnings
+
+warnings.simplefilter("ignore", category=FutureWarning)
+
 
 def visualize(title):
-
     journeys = pd.read_csv(
         os.path.join("in", title, "journeys.csv"), skipinitialspace=True
     )
@@ -176,10 +179,15 @@ def visualize(title):
                 | (journeys["last_mile_mode"] == "taxi")
             )
             & (
-                journeys["first_mile_duration"] + journeys["last_mile_duration"]
-                == j.odm_time
+                (journeys["first_mile_duration"] == j.odm_time)
+                | (journeys["last_mile_duration"] == j.odm_time)
+                | (
+                    journeys["first_mile_duration"] + journeys["last_mile_duration"]
+                    == j.odm_time
+                )
             )
         ].reset_index()
+
         first_mile_end = j.departure + (
             journeys_row.at[0, "first_mile_duration"]
             if journeys_row.at[0, "first_mile_mode"] == "taxi"
