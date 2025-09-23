@@ -1,0 +1,7 @@
+departure, arrival, transfers, first_mile_mode, first_mile_duration, last_mile_mode, last_mile_duration
+2025-09-22 04:11, 2025-09-22 05:54, 3, taxi, 07, walk, 03
+2025-09-22 04:11, 2025-09-22 05:54, 3, taxi, 07, walk, 03
+2025-09-22 13:07, 2025-09-22 14:54, 3, taxi, 07, walk, 03
+2025-09-22 13:07, 2025-09-22 14:56, 2, taxi, 07, walk, 05
+2025-09-22 15:07, 2025-09-22 16:54, 3, taxi, 07, walk, 03
+2025-09-22 15:07, 2025-09-22 16:56, 2, taxi, 07, walk, 05
