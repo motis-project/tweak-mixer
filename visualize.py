@@ -6,6 +6,9 @@ import numpy as np
 
 def visualize(title):
 
+    journeys = pd.read_csv(
+        os.path.join("in", title, "journeys.csv"), skipinitialspace=True
+    )
     cost_threshold = pd.read_csv(os.path.join("out", title, "cost_threshold.csv"))
     pt_journeys = pd.read_csv(os.path.join("out", title, "pt_journeys.csv"))
     odm_journeys = pd.read_csv(os.path.join("out", title, "odm_journeys.csv"))
@@ -16,6 +19,12 @@ def visualize(title):
         os.path.join("out", title, "whitelist_violations.csv")
     )
 
+    journeys["departure"] = pd.to_datetime(
+        journeys["departure"], utc=True
+    ).dt.tz_convert("Europe/Berlin")
+    journeys["arrival"] = pd.to_datetime(journeys["arrival"], utc=True).dt.tz_convert(
+        "Europe/Berlin"
+    )
     cost_threshold["time"] = pd.to_datetime(
         cost_threshold["time"], utc=True
     ).dt.tz_convert("Europe/Berlin")
@@ -43,6 +52,19 @@ def visualize(title):
     whitelist_violations["time"] = pd.to_datetime(
         whitelist_violations["time"], utc=True
     ).dt.tz_convert("Europe/Berlin")
+
+    journeys["first_mile_duration"] = journeys["first_mile_duration"].apply(
+        lambda x: pd.Timedelta(x, unit="m")
+    )
+    journeys["last_mile_duration"] = journeys["last_mile_duration"].apply(
+        lambda x: pd.Timedelta(x, unit="m")
+    )
+    odm_journeys["travel_time"] = odm_journeys["travel_time"].apply(
+        lambda x: pd.Timedelta(x, unit="m")
+    )
+    odm_journeys["odm_time"] = odm_journeys["odm_time"].apply(
+        lambda x: pd.Timedelta(x, unit="m")
+    )
 
     fig = go.Figure()
 
@@ -144,6 +166,58 @@ def visualize(title):
         )
 
     # odm
+    for j in odm_journeys.itertuples():
+        journeys_row = journeys[
+            (journeys["departure"] == j.departure)
+            & (journeys["arrival"] == j.arrival)
+            & (journeys["transfers"] == j.transfers)
+            & (
+                (journeys["first_mile_mode"] == "taxi")
+                | (journeys["last_mile_mode"] == "taxi")
+            )
+            & (
+                journeys["first_mile_duration"] + journeys["last_mile_duration"]
+                == j.odm_time
+            )
+        ].reset_index()
+        first_mile_end = j.departure + (
+            journeys_row.at[0, "first_mile_duration"]
+            if journeys_row.at[0, "first_mile_mode"] == "taxi"
+            else pd.Timedelta(0, unit="m")
+        )
+        last_mile_begin = j.arrival - (
+            journeys_row.at[0, "last_mile_duration"]
+            if journeys_row.at[0, "last_mile_mode"] == "taxi"
+            else pd.Timedelta(0, unit="m")
+        )
+
+        fig.add_shape(
+            type="line",
+            x0=j.departure,
+            y0=j.cost,
+            x1=first_mile_end,
+            y1=j.cost,
+            line=dict(width=1, color="orange"),
+            layer="below",
+        )
+        fig.add_shape(
+            type="line",
+            x0=first_mile_end,
+            y0=j.cost,
+            x1=last_mile_begin,
+            y1=j.cost,
+            line=dict(width=1, color="blue"),
+            layer="below",
+        )
+        fig.add_shape(
+            type="line",
+            x0=last_mile_begin,
+            y0=j.cost,
+            x1=j.arrival,
+            y1=j.cost,
+            line=dict(width=1, color="orange"),
+            layer="below",
+        )
     fig.add_trace(
         go.Scatter(
             x=odm_journeys["center"],
@@ -190,15 +264,6 @@ def visualize(title):
             showlegend=False,
         )
     )
-    for j in odm_journeys.itertuples():
-        fig.add_shape(
-            type="line",
-            x0=j.departure,
-            y0=j.cost,
-            x1=j.arrival,
-            y1=j.cost,
-            line=dict(width=1, color="orange"),
-        )
 
     fig.update_layout(
         title=dict(
