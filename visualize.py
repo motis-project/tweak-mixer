@@ -16,11 +16,11 @@ def visualize(title):
     odm_threshold = pd.read_csv(os.path.join("out", title, "odm_threshold.csv"))
     pt_journeys = pd.read_csv(os.path.join("out", title, "pt_journeys.csv"))
     odm_journeys = pd.read_csv(os.path.join("out", title, "odm_journeys.csv"))
-    blacklist_violations = pd.read_csv(
-        os.path.join("out", title, "blacklist_violations.csv")
+    forbidden_violations = pd.read_csv(
+        os.path.join("out", title, "forbidden_violations.csv")
     )
-    whitelist_violations = pd.read_csv(
-        os.path.join("out", title, "whitelist_violations.csv")
+    required_violations = pd.read_csv(
+        os.path.join("out", title, "required_violations.csv")
     )
 
     journeys["departure"] = pd.to_datetime(
@@ -53,11 +53,11 @@ def visualize(title):
     odm_journeys["arrival"] = pd.to_datetime(
         odm_journeys["arrival"], utc=True
     ).dt.tz_convert("Europe/Berlin")
-    blacklist_violations["time"] = pd.to_datetime(
-        blacklist_violations["time"], utc=True
+    forbidden_violations["time"] = pd.to_datetime(
+        forbidden_violations["time"], utc=True
     ).dt.tz_convert("Europe/Berlin")
-    whitelist_violations["time"] = pd.to_datetime(
-        whitelist_violations["time"], utc=True
+    required_violations["time"] = pd.to_datetime(
+        required_violations["time"], utc=True
     ).dt.tz_convert("Europe/Berlin")
 
     fig = go.Figure()
@@ -83,9 +83,9 @@ def visualize(title):
     # violations
     fig.add_trace(
         go.Scatter(
-            x=blacklist_violations["time"],
-            y=blacklist_violations["cost"],
-            name="Blacklist Violation",
+            x=forbidden_violations["time"],
+            y=forbidden_violations["cost"],
+            name="Forbidden Violation",
             mode="markers",
             marker=dict(
                 color="black",
@@ -98,9 +98,9 @@ def visualize(title):
     )
     fig.add_trace(
         go.Scatter(
-            x=whitelist_violations["time"],
-            y=whitelist_violations["cost"],
-            name="Whitelist Violation",
+            x=required_violations["time"],
+            y=required_violations["cost"],
+            name="Required Violation",
             mode="markers",
             marker=dict(
                 color="white",
