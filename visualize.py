@@ -12,7 +12,8 @@ def visualize(title):
     journeys = pd.read_csv(
         os.path.join("in", title, "journeys.csv"), skipinitialspace=True
     )
-    cost_threshold = pd.read_csv(os.path.join("out", title, "cost_threshold.csv"))
+    pt_threshold = pd.read_csv(os.path.join("out", title, "pt_threshold.csv"))
+    odm_threshold = pd.read_csv(os.path.join("out", title, "odm_threshold.csv"))
     pt_journeys = pd.read_csv(os.path.join("out", title, "pt_journeys.csv"))
     odm_journeys = pd.read_csv(os.path.join("out", title, "odm_journeys.csv"))
     blacklist_violations = pd.read_csv(
@@ -28,8 +29,11 @@ def visualize(title):
     journeys["arrival"] = pd.to_datetime(journeys["arrival"], utc=True).dt.tz_convert(
         "Europe/Berlin"
     )
-    cost_threshold["time"] = pd.to_datetime(
-        cost_threshold["time"], utc=True
+    pt_threshold["time"] = pd.to_datetime(pt_threshold["time"], utc=True).dt.tz_convert(
+        "Europe/Berlin"
+    )
+    odm_threshold["time"] = pd.to_datetime(
+        odm_threshold["time"], utc=True
     ).dt.tz_convert("Europe/Berlin")
     pt_journeys["departure"] = pd.to_datetime(
         pt_journeys["departure"], utc=True
@@ -58,13 +62,21 @@ def visualize(title):
 
     fig = go.Figure()
 
-    # threshold
+    # thresholds
     fig.add_trace(
         go.Scatter(
-            x=cost_threshold["time"],
-            y=cost_threshold["cost"],
-            name="Cost Threshold",
-            line=dict(color="gray"),
+            x=pt_threshold["time"],
+            y=pt_threshold["cost"],
+            name="PT Threshold",
+            line=dict(color="blue", dash="dot"),
+        )
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=odm_threshold["time"],
+            y=odm_threshold["cost"],
+            name="ODM Threshold",
+            line=dict(color="orange", dash="dot"),
         )
     )
 
@@ -193,7 +205,7 @@ def visualize(title):
             x1=first_mile_end,
             y1=j.cost,
             line=dict(width=1, color="orange"),
-            layer="below",
+            layer="above",
         )
         fig.add_shape(
             type="line",
@@ -202,7 +214,7 @@ def visualize(title):
             x1=last_mile_begin,
             y1=j.cost,
             line=dict(width=1, color="blue"),
-            layer="below",
+            layer="above",
         )
         fig.add_shape(
             type="line",
@@ -211,7 +223,7 @@ def visualize(title):
             x1=j.arrival,
             y1=j.cost,
             line=dict(width=1, color="orange"),
-            layer="below",
+            layer="above",
         )
     fig.add_trace(
         go.Scatter(
