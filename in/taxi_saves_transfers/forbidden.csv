@@ -1,4 +1,3 @@
 ,departure,arrival,transfers,first_mile_mode,first_mile_duration,last_mile_mode,last_mile_duration
 0,2025-06-16 10:14:00,2025-06-16 11:00:00,3,taxi,6,walk,5
 1,2025-06-16 10:20:00,2025-06-16 11:00:00,2,taxi,10,walk,5
-2,2025-06-16 10:30:00,2025-06-16 11:00:00,1,taxi,15,walk,5
