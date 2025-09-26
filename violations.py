@@ -26,6 +26,16 @@ def violations(title):
     pt_threshold = pd.read_csv(os.path.join("out", title, "pt_threshold.csv"))
     odm_threshold = pd.read_csv(os.path.join("out", title, "odm_threshold.csv"))
 
+    forbidden["departure"] = pd.to_datetime(forbidden["departure"], utc=True)
+    forbidden["arrival"] = pd.to_datetime(forbidden["arrival"], utc=True)
+    required["departure"] = pd.to_datetime(required["departure"], utc=True)
+    required["arrival"] = pd.to_datetime(required["arrival"], utc=True)
+    odm_journeys["departure"] = pd.to_datetime(odm_journeys["departure"], utc=True)
+    odm_journeys["arrival"] = pd.to_datetime(odm_journeys["arrival"], utc=True)
+    odm_journeys["center"] = pd.to_datetime(odm_journeys["center"], utc=True)
+    pt_threshold["time"] = pd.to_datetime(pt_threshold["time"], utc=True)
+    odm_threshold["time"] = pd.to_datetime(odm_threshold["time"], utc=True)
+
     forbidden_violations = {"time": [], "cost": []}
     required_violations = {"time": [], "cost": []}
     for j in odm_journeys.itertuples():
